@@ -80,9 +80,10 @@ gulp.task('copyHtml_w', function() {
 /*PUG*/
 // Compile PUG to HTML
 gulp.task('pug', function buildHTML() {
-  return gulp.src('source/*.pug')
+  return gulp.src('./source/*.pug')
+    .pipe(plumber())
     .pipe(pug())
-    .pipe(gulp.dest('dev/'))
+    .pipe(gulp.dest('./dev/'))
 });
 
 // Watch PUG
