@@ -37,20 +37,20 @@ const sourcemaps = require('gulp-sourcemaps');
 gulp.task('framework', function() {
   gulp.src('source/framework/*.html')
     .pipe(gulp.dest('dev/'));
-  gulp.src('source/framework/img/*')
+  gulp.src('source/framework/img/**')
     .pipe(gulp.dest('dev/img/'));
-  gulp.src('source/framework/css/*')
+  gulp.src('source/framework/css/**')
     .pipe(gulp.dest('dev/css/'));
-  gulp.src('source/framework/js/*')
+  gulp.src('source/framework/js/**')
     .pipe(gulp.dest('dev/js/'));
 });
 
 
 // Compress PNG, JPEG, GIF, SVG and copy them in /dev/img/ and replace copyImg()
 gulp.task('compressImg', function() {
-  gulp.src('source/img/*')
+  gulp.src('source/img/**')
     .pipe(gulp.dest('dev/img/'));
-  gulp.src('source/images/*')
+  gulp.src('source/images/**')
     .pipe(imagemin([
       imagemin.gifsicle({ interlaced: true }),
       imagemin.jpegtran({ progressive: true }),
@@ -60,7 +60,7 @@ gulp.task('compressImg', function() {
 });
 
 gulp.task('compressImg_w', function() {
-  gulp.watch('source/img/*', ['compressImg']);
+  gulp.watch('source/img/**', ['compressImg']);
 });
 
 
@@ -98,7 +98,7 @@ gulp.task('scss', function() {
     .pipe(sourcemaps.init())
     .pipe(sass().on('error', sass.logError))
     .pipe(sourcemaps.write('.'))
-    .pipe(gulp.dest('dev/css/'));
+    .pipe(gulp.dest('./dev/css/'));
 });
 
 // Watch SASS/SCSS
@@ -143,11 +143,11 @@ gulp.task('watch', ['start', 'framework', 'compressImg_w', 'pug_w', 'copyHtml_w'
 gulp.task('copy_dist', function() {
   gulp.src('dev/*.html')
     .pipe(gulp.dest('dist/'));
-  gulp.src('dev/img/*')
+  gulp.src('dev/img/**')
     .pipe(gulp.dest('dist/img/'));
-  gulp.src('dev/css/*')
+  gulp.src('dev/css/**')
     .pipe(gulp.dest('dist/css/'));
-  gulp.src('dev/js/*')
+  gulp.src('dev/js/**')
     .pipe(gulp.dest('dist/js/'));
 });
 
@@ -159,7 +159,7 @@ gulp.task('postCss_dist', function() {
     autoprefixer({ browsers: ['last 4 version'] }),
     cssnano(),
   ];
-  return gulp.src('./dist/css/style.css')
+  return gulp.src('./dev/css/style.css')
     .pipe(sourcemaps.init())
     .pipe(postcss(plugins))
     .pipe(rename({ extname: '.min.css' }))
@@ -174,7 +174,7 @@ gulp.task('postCss2_dist', function() {
     autoprefixer({ browsers: ['last 4 version'] }),
     cssnano(),
   ];
-  return gulp.src('./dist/css/styles.css')
+  return gulp.src('./dev/css/styles.css')
     .pipe(sourcemaps.init())
     .pipe(postcss(plugins))
     .pipe(rename({ extname: '.min.css' }))
@@ -182,6 +182,23 @@ gulp.task('postCss2_dist', function() {
     .pipe(gulp.dest('./dist/css/'));
     
 });
+
+// PostCSS & concat all css
+gulp.task('concatCss_dis', function() {
+  var plugins = [
+    autoprefixer({ browsers: ['last 4 version'] }),
+    cssnano(),
+  ];
+  return gulp.src('./dev/css/*.css')
+    .pipe(sourcemaps.init())
+    .pipe(plumber())
+    .pipe(concat("style.css"))
+    .pipe(postcss(plugins))
+    .pipe(sourcemaps.write('.'))
+    .pipe(gulp.dest('./dist/css/'));
+});
+
+
 
 /*JS*/
 // Compress JS
@@ -201,8 +218,13 @@ gulp.task('compressJs_dist', function(cb) {
 
 
 /*Script*/
+// Distribution code
 
-gulp.task('dist', ['copy_dist', 'postCss_dist','postCss2_dist', 'compressJs_dist']);
+// Distribution with compress bundle.js and concat all css
+gulp.task('dist', ['copy_dist', 'concatCss_dis', 'compressJs_dist']);
+
+// Distribution with compress bundle.js and withOUT concat all css
+gulp.task('dist_without-concat-css', ['copy_dist', 'postCss_dist','postCss2_dist', 'compressJs_dist']);
 
 
 

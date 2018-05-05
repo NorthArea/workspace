@@ -33,4 +33,8 @@ watch: imagemin, sass, pug, concat js.
   gulp dist
 ```
 it create ./dev - for distribution code
-dist:postcss, uglify, autoprefixer, cssnano.
+dist:concat all *.css, postcss, uglify, autoprefixer, cssnano.
+
+```bash
+  gulp dist_without-concat-css
+```
