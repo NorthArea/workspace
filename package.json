@@ -1,10 +1,14 @@
 {
   "name": "workspace",
-  "version": "2.0.0",
+  "version": "2.0.2",
   "description": "npm(gulp) workspase with PUG, SASS, PostCss and other",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "clean": "gulp clean",
+    "start": "gulp start",
+    "watch": "gulp watch",
+    "build": "gulp build",
+    "gulp": "gulp --tasks"
   },
   "repository": {
     "type": "git",
@@ -14,15 +18,15 @@
     "workspace",
     "npm",
     "gulp",
-    "postsass",
-    "cssnano",
+    "postcss",
     "sass",
+    "cssnano",
     "scss",
     "pug",
     "html",
-    "imagemin",
     "uglify",
-    "autoprefixer"
+    "autoprefixer",
+    "imagemin"
   ],
   "author": "NorthArea",
   "license": "MIT",
@@ -32,21 +36,15 @@
   "homepage": "https://github.com/NorthArea/workspace#readme",
   "devDependencies": {
     "autoprefixer": "^8.4.1",
-    "clean-css": "^4.1.11",
     "cssnano": "^3.10.0",
     "del": "^3.0.0",
     "gulp": "^4.0.0",
-    "gulp-clean-css": "^3.9.4",
-    "gulp-cli": "^2.0.1",
     "gulp-concat": "^2.6.1",
     "gulp-imagemin": "^4.1.0",
-    "gulp-plumber": "^1.2.0",
     "gulp-postcss": "^7.0.1",
     "gulp-pug": "^4.0.1",
     "gulp-rename": "^1.2.2",
     "gulp-sass": "^4.0.1",
-    "gulp-sourcemaps": "^2.6.4",
-    "gulp-uglify": "^3.0.0",
-    "pump": "^3.0.0"
+    "gulp-uglify": "^3.0.0"
   }
 }

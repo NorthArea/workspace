@@ -2,9 +2,6 @@
 // Automation
 const gulp = require("gulp");
 // Pipes streams together and destroys all of them if one of them closes.
-const pump = require('pump');
-// Replaces pipe method and removes standard onerror handler on error event
-const plumber = require('gulp-plumber');
 
 /*File*/
 // Delete file
@@ -27,8 +24,6 @@ const postcss = require('gulp-postcss');
 const autoprefixer = require('autoprefixer');
 // Compress and optimize CSS
 const cssnano = require('cssnano');
-//CSS optimizer
-const cleanCSS = require('gulp-clean-css');
 
 /*JS*/
 // Concatenate JS
@@ -40,25 +35,25 @@ const sourcemaps = require('gulp-sourcemaps');
 
 
 //Variables
-var my = {
+var ws = {
   styles: {
-    src: 'source/scss/*.scss',
+    src: 'source/workspace/scss/*.scss',
     dest: 'build/assets/css/'
   },
   scripts: {
-    src: 'source/js/**/*.js',
+    src: 'source/workspace/js/**/*.js',
     dest: 'build/assets/js/'
   },
   img: {
-    src: 'source/img/**',
+    src: 'source/workspace/img/**',
     dest: 'build/assets/img/'
   },
   html: {
-    src: 'source/*.html',
+    src: 'source/workspace/*.html',
     dest: 'build/'
   },
   pug: {
-    src: 'source/*.pug',
+    src: 'source/workspace/*.pug',
     dest: 'build/'
   }
 };
@@ -80,15 +75,17 @@ var framework = {
 
 
 //Functions
-// Remove 'build' filder
+
+// File
+//Remove ./build
 function clean() {
   return del(['build']);
 }
 
 // Copy img
-function copyMyImg() {
-  return gulp.src(my.img.src)
-    .pipe(gulp.dest(my.img.dest));
+function copyWsImg() {
+  return gulp.src(ws.img.src)
+    .pipe(gulp.dest(ws.img.dest));
 }
 
 function copyFrameworkImg() {
@@ -97,14 +94,14 @@ function copyFrameworkImg() {
 }
 
 // Compress PNG, JPEG, GIF, SVG and copy them in /dev/img/ and replace copyImg()
-function compressMyImg() {
-  return gulp.src(my.img.src)
+function compressWsImg() {
+  return gulp.src(ws.img.src)
     .pipe(imagemin([
       imagemin.gifsicle({ interlaced: true }),
       imagemin.jpegtran({ progressive: true }),
       imagemin.optipng({ optimizationLevel: 5 }),
     ]))
-    .pipe(gulp.dest(my.img.dest));
+    .pipe(gulp.dest(ws.img.dest));
 }
 
 function compressFrameworkImg() {
@@ -117,10 +114,9 @@ function compressFrameworkImg() {
     .pipe(gulp.dest(framework.img.dest));
 }
 
-
 // Watch Img
-function watchMyImg() {
-  gulp.watch(my.img.src, gulp.series(copyMyImg, compressMyImg));
+function watchWsImg() {
+  gulp.watch(ws.img.src, gulp.series(copyWsImg, compressWsImg));
 }
 
 function watchFrameworkImg() {
@@ -130,47 +126,50 @@ function watchFrameworkImg() {
 
 // PUG & HTML
 // Copy HTML  from ./source to ./test
-function copyMyHtml() {
-  return gulp.src(my.html.src)
-    .pipe(gulp.dest(my.html.dest));
+function copyWsHtml() {
+  return gulp.src(ws.html.src)
+    .pipe(gulp.dest(ws.html.dest));
 }
 
 // Compile PUG to HTML
-function myPug() {
-  return gulp.src(my.pug.src)
+function wsPug() {
+  return gulp.src(ws.pug.src)
     .pipe(pug())
-    .pipe(gulp.dest(my.pug.dest));
+    .pipe(gulp.dest(ws.pug.dest));
 }
 
 // Watch
-function watchMyHtml() {
-  gulp.watch(my.html.src, copyMyHtml);
+function watchWsHtml() {
+  gulp.watch(ws.html.src, copyWsHtml);
 }
 
-function watchMyPug() {
-  gulp.watch(my.pug.src, myPug);
+function watchWsPug() {
+  gulp.watch(ws.pug.src, wsPug);
 }
 
 
 //JS, CSS, SASS
-// "My" JS
-function myScript() {
-  return gulp.src(my.scripts.src, { sourcemaps: true })
+// "Ws" JS
+function wsScript() {
+  return gulp.src(ws.scripts.src, { sourcemaps: true })
     .pipe(concat('bundle.js'))
-    .pipe(gulp.dest(my.scripts.dest));
+    .pipe(sourcemaps.write('.'))
+    .pipe(gulp.dest(ws.scripts.dest));
 }
 
-// "My" SASS
-function myStyle() {
-  return gulp.src(my.styles.src, { sourcemaps: true })
+// "Ws" SASS
+function wsStyle() {
+  return gulp.src(ws.styles.src, { sourcemaps: true })
     .pipe(sass())
-    .pipe(gulp.dest(my.styles.dest));
+    .pipe(sourcemaps.write('.', { sourceRoot: 'css-source' }))
+    .pipe(gulp.dest(ws.styles.dest));
 }
 
 // "Framework" JS
 function frameworkScript() {
   return gulp.src(framework.scripts.src, { sourcemaps: true })
     .pipe(concat('framework.js'))
+    .pipe(sourcemaps.write('.'))
     .pipe(gulp.dest(framework.scripts.dest));
 }
 
@@ -182,75 +181,116 @@ function frameworkStyle() {
   return gulp.src(framework.styles.src, { sourcemaps: true })
     .pipe(concat('framework.css'))
     .pipe(postcss(plugins))
+    .pipe(sourcemaps.write('.', { sourceRoot: 'css-source' }))
     .pipe(gulp.dest(framework.styles.dest));
 }
 
-// Watch "My" JS
-function watchMyScript() {
-  gulp.watch(my.scripts.src, myScript);
+// Watch "Ws" JS
+function watchWsScript() {
+  gulp.watch(ws.scripts.src, wsScript);
 }
 
-// Watch "My" SASS
-function watchMyStyle() {
-  gulp.watch(my.styles.src, myStyle);
+// Watch "Ws" SASS
+function watchWsStyle() {
+  gulp.watch(ws.styles.src, wsStyle);
 }
 
 // Watch Framework JS
 function watchFrameworkScript() {
-  gulp.watch(framework.scripts.src, myScript);
+  gulp.watch(framework.scripts.src, wsScript);
 }
 
 // Watch Framework CSS
 function watchFrameworkStyle() {
-  gulp.watch(framework.styles.src, myStyle);
+  gulp.watch(framework.styles.src, wsStyle);
 }
 
 
-// Start Tasks
+// Build
+// Compress & uncompress "Ws" style
+function wsStyleBuild_uncompress() {
+  return gulp.src(ws.styles.src, { sourcemaps: true })
+    .pipe(sass())
+    .pipe(rename({ extname: '.uncompress.css' }))
+    .pipe(sourcemaps.write('.', { sourceRoot: 'css-source' }))
+    .pipe(gulp.dest(ws.styles.dest));
+}
+
+function wsStyleBuild_compress() {
+  var plugins = [
+    autoprefixer({ browsers: ['last 8 version'] }),
+    cssnano(),
+  ];
+  return gulp.src(ws.styles.src, { sourcemaps: true })
+    .pipe(sass())
+    .pipe(postcss(plugins))
+    .pipe(sourcemaps.write('.', { sourceRoot: 'css-source' }))
+    .pipe(gulp.dest(ws.styles.dest));
+}
+
+// Compress & uncompress "Ws" script
+function wsScriptBuild_uncompress() {
+  return gulp.src(ws.scripts.src, { sourcemaps: true })
+    .pipe(concat('bundle.uncompress.js'))
+    .pipe(sourcemaps.write('.'))
+    .pipe(gulp.dest(ws.scripts.dest));
+}
+
+function wsScriptBuild_compress() {
+  return gulp.src(ws.scripts.src, { sourcemaps: true })
+    .pipe(concat('bundle.js'))
+    .pipe(uglify())
+    .pipe(sourcemaps.write('.'))
+    .pipe(gulp.dest(ws.scripts.dest));
+}
+
+// Tasks
 gulp.task('clean', clean);
 
-gulp.task('start', gulp.parallel(
-  gulp.series(
-    gulp.parallel(copyMyImg, copyFrameworkImg),
-    gulp.parallel(compressMyImg, compressFrameworkImg)
-  ),
-  copyMyHtml, 
-  myPug, 
-  myScript, 
-  myStyle, 
-  frameworkScript, 
-  frameworkStyle
+gulp.task('start', gulp.series(
+  clean,
+  gulp.parallel(
+    gulp.series(
+      gulp.parallel(copyWsImg, copyFrameworkImg),
+      gulp.parallel(compressWsImg, compressFrameworkImg)
+    ),
+    copyWsHtml,
+    wsPug,
+    wsScript,
+    wsStyle,
+    frameworkScript,
+    frameworkStyle
+  )
 ));
 
 gulp.task('watch', gulp.series(
   'start',
   gulp.parallel(
-    watchMyImg,
+    watchWsImg,
     watchFrameworkImg,
-    watchMyHtml,
-    watchMyPug,
-    watchMyScript,
-    watchMyStyle,
+    watchWsHtml,
+    watchWsPug,
+    watchWsScript,
+    watchWsStyle,
     watchFrameworkScript,
     watchFrameworkStyle
-)));
+  )
+));
 
-
-// Build
-
-gulp.task('concatCSS_dis', function() {
-  var plugins = [
-    autoprefixer({ browsers: ['last 4 version'] }),
-    cssnano(),
-  ];
-  return gulp.src('./test/css/*.css')
-    .pipe(sourcemaps.init())
-    .pipe(plumber())
-    .pipe(concat("main.css"))
-    .pipe(postcss(plugins))
-    .pipe(sourcemaps.write('.'))
-    .pipe(gulp.dest('./dist/css/'));
-});
-
-
-
+gulp.task('build', gulp.series(
+  clean,
+  gulp.series(
+    gulp.parallel(copyWsImg, copyFrameworkImg),
+    gulp.parallel(compressWsImg, compressFrameworkImg)
+  ),
+  gulp.parallel(
+    copyWsHtml,
+    wsPug,
+    wsScriptBuild_uncompress,
+    wsScriptBuild_compress,
+    wsStyleBuild_uncompress,
+    wsStyleBuild_compress,
+    frameworkScript,
+    frameworkStyle
+  )
+));
