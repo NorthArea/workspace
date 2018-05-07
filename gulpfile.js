@@ -5,14 +5,19 @@ const gulp = require("gulp");
 const pump = require('pump');
 // Replaces pipe method and removes standard onerror handler on error event
 const plumber = require('gulp-plumber');
+
 /*File*/
+// Delete file
+const del = require('del');
 // Rename file rename({ extname: '.min.js' })
 const rename = require("gulp-rename");
 // Compress PNG, JPEG, GIF and SVG images
 const imagemin = require('gulp-imagemin');
+
 /*HTML*/
 // Compile PUG to HTML
 const pug = require('gulp-pug');
+
 /*CSS*/
 // Compile SASS to css
 const sass = require('gulp-sass');
@@ -22,6 +27,9 @@ const postcss = require('gulp-postcss');
 const autoprefixer = require('autoprefixer');
 // Compress and optimize CSS
 const cssnano = require('cssnano');
+//CSS optimizer
+const cleanCSS = require('gulp-clean-css');
+
 /*JS*/
 // Concatenate JS
 const concat = require('gulp-concat');
@@ -31,431 +39,201 @@ const uglify = require("gulp-uglify");
 const sourcemaps = require('gulp-sourcemaps');
 
 
-/*Devtools*/
+//Variables
+var my = {
+  styles: {
+    src: 'source/scss/*.scss',
+    dest: 'build/assets/css/'
+  },
+  scripts: {
+    src: 'source/js/**/*.js',
+    dest: 'build/assets/js/'
+  },
+  img: {
+    src: 'source/img/**',
+    dest: 'build/assets/img/'
+  },
+  html: {
+    src: 'source/*.html',
+    dest: 'build/'
+  },
+  pug: {
+    src: 'source/*.pug',
+    dest: 'build/'
+  }
+};
 
-/*Framework*/
-gulp.task('framework', function() {
-  gulp.src('source/framework/*.html')
-    .pipe(gulp.dest('dev/'));
-  gulp.src('source/framework/img/**')
-    .pipe(gulp.dest('dev/img/'));
-  gulp.src('source/framework/css/**')
-    .pipe(gulp.dest('dev/css/'));
-  gulp.src('source/framework/js/**')
-    .pipe(gulp.dest('dev/js/'));
-});
+var framework = {
+  styles: {
+    src: 'source/framework/css/**/*.css',
+    dest: 'build/assets/css/'
+  },
+  scripts: {
+    src: 'source/framework/js/**/*.js',
+    dest: 'build/assets/js/'
+  },
+  img: {
+    src: 'source/framework/img/**',
+    dest: 'build/assets/img/'
+  }
+};
 
+
+//Functions
+// Remove 'build' filder
+function clean() {
+  return del(['build']);
+}
+
+// Copy img
+function copyMyImg() {
+  return gulp.src(my.img.src)
+    .pipe(gulp.dest(my.img.dest));
+}
+
+function copyFrameworkImg() {
+  return gulp.src(framework.img.src)
+    .pipe(gulp.dest(framework.img.dest));
+}
 
 // Compress PNG, JPEG, GIF, SVG and copy them in /dev/img/ and replace copyImg()
-gulp.task('compressImg', function() {
-  gulp.src('source/img/**')
-    .pipe(gulp.dest('dev/img/'));
-  gulp.src('source/images/**')
+function compressMyImg() {
+  return gulp.src(my.img.src)
     .pipe(imagemin([
       imagemin.gifsicle({ interlaced: true }),
       imagemin.jpegtran({ progressive: true }),
       imagemin.optipng({ optimizationLevel: 5 }),
     ]))
-    .pipe(gulp.dest('dev/img/'))
-});
+    .pipe(gulp.dest(my.img.dest));
+}
 
-gulp.task('compressImg_w', function() {
-  gulp.watch('source/img/**', ['compressImg']);
-});
+function compressFrameworkImg() {
+  return gulp.src(framework.img.src)
+    .pipe(imagemin([
+      imagemin.gifsicle({ interlaced: true }),
+      imagemin.jpegtran({ progressive: true }),
+      imagemin.optipng({ optimizationLevel: 5 }),
+    ]))
+    .pipe(gulp.dest(framework.img.dest));
+}
 
 
-/*HTML*/
+// Watch Img
+function watchMyImg() {
+  gulp.watch(my.img.src, gulp.series(copyMyImg, compressMyImg));
+}
+
+function watchFrameworkImg() {
+  gulp.watch(framework.img.src, gulp.series(copyFrameworkImg, compressFrameworkImg));
+}
+
+
+// PUG & HTML
 // Copy HTML  from ./source to ./test
-gulp.task('copyHtml', function() {
-  gulp.src('source/*.html')
-    .pipe(gulp.dest('dev/'));
-});
-
-// Watch HTML
-gulp.task('copyHtml_w', function() {
-  gulp.watch('source/*.html', ['copyHTML']);
-});
-
-
-/*PUG*/
-// Compile PUG to HTML
-gulp.task('pug', function buildHTML() {
-  return gulp.src('./source/*.pug')
-    .pipe(plumber())
-    .pipe(pug())
-    .pipe(gulp.dest('./dev/'))
-});
-
-// Watch PUG
-gulp.task('pug_w', function() {
-  gulp.watch('source/*.pug', ['pug']);
-});
-
-/*SCSS*/
-// Compile SCSS
-gulp.task('scss', function() {
-  return gulp.src('source/scss/*.scss')
-    .pipe(sourcemaps.init())
-    .pipe(sass().on('error', sass.logError))
-    .pipe(sourcemaps.write('.'))
-    .pipe(gulp.dest('./dev/css/'));
-});
-
-// Watch SASS/SCSS
-gulp.task('scss_w', function() {
-  gulp.watch('source/scss/*.scss', ['scss']);
-});
-
-
-/*JS*/
-// Concatenate JS
-gulp.task('concatJs', function(cb) {
-  pump([
-      gulp.src('source/js/*.js'),
-      sourcemaps.init(),
-      plumber(),
-      concat('bundle.js'),
-      sourcemaps.write('.'),
-      gulp.dest('test/js/'), // save .js
-    ],
-    cb
-  );
-});
-
-gulp.task('concatJs_w', function() {
-  gulp.watch('source/js/*.js', ['concatJs']);
-});
-
-
-/*Script*/
-
-// Start(restart) Development
-gulp.task('start', ['framework','compressImg', 'pug', 'copyHtml', 'scss', 'concatJs']);
-
-// Start Watch TEST
-gulp.task('watch', ['start', 'framework', 'compressImg_w', 'pug_w', 'copyHtml_w', 'scss_w', 'concatJs_w']);
-
-
-/*DIST*/
-
-/*File*/
-//Copy file from dev to dist
-gulp.task('copy_dist', function() {
-  gulp.src('dev/*.html')
-    .pipe(gulp.dest('dist/'));
-  gulp.src('dev/img/**')
-    .pipe(gulp.dest('dist/img/'));
-  gulp.src('dev/css/**')
-    .pipe(gulp.dest('dist/css/'));
-  gulp.src('dev/js/**')
-    .pipe(gulp.dest('dist/js/'));
-});
-
-
-/*CSS*/
-// PostCSS style.css
-gulp.task('postCss_dist', function() {
-  var plugins = [
-    autoprefixer({ browsers: ['last 4 version'] }),
-    cssnano(),
-  ];
-  return gulp.src('./dev/css/style.css')
-    .pipe(sourcemaps.init())
-    .pipe(postcss(plugins))
-    .pipe(rename({ extname: '.min.css' }))
-    .pipe(sourcemaps.write('.'))
-    .pipe(gulp.dest('./dist/css/'));
-    
-});
-
-// PostCSS styles.css
-gulp.task('postCss2_dist', function() {
-  var plugins = [
-    autoprefixer({ browsers: ['last 4 version'] }),
-    cssnano(),
-  ];
-  return gulp.src('./dev/css/styles.css')
-    .pipe(sourcemaps.init())
-    .pipe(postcss(plugins))
-    .pipe(rename({ extname: '.min.css' }))
-    .pipe(sourcemaps.write('.'))
-    .pipe(gulp.dest('./dist/css/'));
-    
-});
-
-// PostCSS & concat all css
-gulp.task('concatCss_dis', function() {
-  var plugins = [
-    autoprefixer({ browsers: ['last 4 version'] }),
-    cssnano(),
-  ];
-  return gulp.src('./dev/css/*.css')
-    .pipe(sourcemaps.init())
-    .pipe(plumber())
-    .pipe(concat("style.css"))
-    .pipe(postcss(plugins))
-    .pipe(sourcemaps.write('.'))
-    .pipe(gulp.dest('./dist/css/'));
-});
-
-
-
-/*JS*/
-// Compress JS
-gulp.task('compressJs_dist', function(cb) {
-  pump([
-      gulp.src('dist/js/bundle.js'),
-      sourcemaps.init(),
-      plumber(),
-      uglify(),
-      rename({ extname: '.min.js' }),
-      sourcemaps.write('.'),
-      gulp.dest('dist/js/'), // save .min.js
-    ],
-    cb
-  );
-});
-
-
-/*Script*/
-// Distribution code
-
-// Distribution with compress bundle.js and concat all css
-gulp.task('dist', ['copy_dist', 'concatCss_dis', 'compressJs_dist']);
-
-// Distribution with compress bundle.js and withOUT concat all css
-gulp.task('dist_without-concat-css', ['copy_dist', 'postCss_dist','postCss2_dist', 'compressJs_dist']);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-gulp.src('source/framework/*.html')
-    .pipe(gulp.dest('test/'));
-
-gulp.task('concatJS', function(cb) {
-  pump([
-      gulp.src('source/js/*.js'),
-      sourcemaps.init(),
-      plumber(),
-      concat('bundle.js'),
-      sourcemaps.write('.'),
-      gulp.dest('test/js/'), // save .js
-    ],
-    cb
-  );
-});
-
-gulp.task('copyHTML', function(cb) {
-  pump([],cb);
-});
-
-
-//File
-// Compress PNG, JPEG, GIF and SVG images
-gulp.task('compressImage', () =>
-  gulp.src('source/images/*')
-  .pipe(imagemin([
-    imagemin.gifsicle({ interlaced: true }),
-    imagemin.jpegtran({ progressive: true }),
-    imagemin.optipng({ optimizationLevel: 5 }),
-  ]))
-  .pipe(gulp.dest('test/images/'))
-);
-
-
-//HTML
-// Copy HTML  from ./source to ./test
-gulp.task('copyHTML', function() {
-  gulp.src('source/*.html')
-    .pipe(gulp.dest('test/'));
-});
+function copyMyHtml() {
+  return gulp.src(my.html.src)
+    .pipe(gulp.dest(my.html.dest));
+}
 
 // Compile PUG to HTML
-gulp.task('pug', function buildHTML() {
-  return gulp.src('source/*.pug')
+function myPug() {
+  return gulp.src(my.pug.src)
     .pipe(pug())
-    .pipe(gulp.dest('test/'))
-});
+    .pipe(gulp.dest(my.pug.dest));
+}
 
-//CSS
-// Copy CSS  from ./source to ./test
-gulp.task('copyCSS', function() {
-  gulp.src('source/scss/*.css')
-    .pipe(gulp.dest('test/css/'));
-});
+// Watch
+function watchMyHtml() {
+  gulp.watch(my.html.src, copyMyHtml);
+}
 
-// Compile SCSS
-gulp.task('scss', function() {
-  return gulp.src('source/scss/*.scss')
-    .pipe(sourcemaps.init())
-    .pipe(sass().on('error', sass.logError))
-    .pipe(sourcemaps.write('.'))
-    .pipe(gulp.dest('test/css/'));
-});
+function watchMyPug() {
+  gulp.watch(my.pug.src, myPug);
+}
 
-//JS
-// Concatenate JS
-gulp.task('concatJS', function(cb) {
-  pump([
-      gulp.src('source/js/*.js'),
-      sourcemaps.init(),
-      plumber(),
-      concat('bundle.js'),
-      sourcemaps.write('.'),
-      gulp.dest('test/js/'), // save .js
-    ],
-    cb
-  );
-});
 
-//Watch Test
+//JS, CSS, SASS
+// "My" JS
+function myScript() {
+  return gulp.src(my.scripts.src, { sourcemaps: true })
+    .pipe(concat('bundle.js'))
+    .pipe(gulp.dest(my.scripts.dest));
+}
 
-// Watch IMG
-gulp.task('compressImage_w', function() {
-  gulp.watch('source/images/*', ['compressImage']);
-});
+// "My" SASS
+function myStyle() {
+  return gulp.src(my.styles.src, { sourcemaps: true })
+    .pipe(sass())
+    .pipe(gulp.dest(my.styles.dest));
+}
 
-// Watch HTML
-gulp.task('copyHTML_w', function() {
-  gulp.watch('source/*.html', ['copyHTML']);
-});
+// "Framework" JS
+function frameworkScript() {
+  return gulp.src(framework.scripts.src, { sourcemaps: true })
+    .pipe(concat('framework.js'))
+    .pipe(gulp.dest(framework.scripts.dest));
+}
 
-// Watch PUG
-gulp.task('pug_w', function() {
-  gulp.watch('source/*.pug', ['pug']);
-});
+// "Framework" CSS
+function frameworkStyle() {
+  return gulp.src(framework.styles.src, { sourcemaps: true })
+    .pipe(concat('framework.css'))
+    .pipe(gulp.dest(framework.styles.dest));
+}
 
-// Watch CSS
-gulp.task('copyCSS_w', function() {
-  gulp.watch('source/css/*.css', ['copyCSS']);
-});
+// Watch "My" JS
+function watchMyScript() {
+  gulp.watch(my.scripts.src, myScript);
+}
 
-// Watch SASS/SCSS
-gulp.task('scss_w', function() {
-  gulp.watch('source/css/scss/*.scss', ['scss']);
-});
+// Watch "My" SASS
+function watchMyStyle() {
+  gulp.watch(my.styles.src, myStyle);
+}
 
-// Watch PUG
-gulp.task('concatJS_w', function() {
-  gulp.watch('source/js/*.js', ['concatJS']);
-});
+// Watch Framework JS
+function watchFrameworkScript() {
+  gulp.watch(framework.scripts.src, myScript);
+}
 
-//Script
+// Watch Framework CSS
+function watchFrameworkStyle() {
+  gulp.watch(framework.styles.src, myStyle);
+}
 
-// Start(restart) TEST
-gulp.task('start', ['compressImage', 'pug', 'copyHTML', 'copyCSS', 'scss', 'concatJS']);
 
-// Start Watch TEST
-gulp.task('default', ['start', 'compressImage_w', 'pug_w', 'copyHTML_w', 'copyCSS_w', 'scss_w', 'concatJS_w']);
+// Start Tasks
+gulp.task('clean', clean);
 
-//DIST
+gulp.task('start', gulp.parallel(
+  gulp.series(
+    gulp.parallel(copyMyImg, copyFrameworkImg),
+    gulp.parallel(compressMyImg, compressFrameworkImg)
+  ),
+  copyMyHtml, 
+  myPug, 
+  myScript, 
+  myStyle, 
+  frameworkScript, 
+  frameworkStyle
+));
 
-//IMG
-// Copy img  from ./test to ./dist
-gulp.task('copyImage_dist', function() {
-  gulp.src('test/images/*')
-    .pipe(gulp.dest('dist/images/'));
-});
+gulp.task('watch', gulp.series(
+  'start',
+  gulp.parallel(
+    watchMyImg,
+    watchFrameworkImg,
+    watchMyHtml,
+    watchMyPug,
+    watchMyScript,
+    watchMyStyle,
+    watchFrameworkScript,
+    watchFrameworkStyle
+)));
 
-//HTML
-// Copy HTML  from ./test to ./dist
-gulp.task('copyHTML_dist', function() {
-  gulp.src('test/*.html')
-    .pipe(gulp.dest('dist/'));
-});
 
-//CSS
-// PostCSS
-gulp.task('postCSS_dist', function() {
-  var plugins = [
-    autoprefixer({ browsers: ['last 4 version'] }),
-    cssnano(),
-  ];
-  return gulp.src('./test/css/*.css')
-    .pipe(sourcemaps.init())
-    .pipe(postcss(plugins))
-    .pipe(sourcemaps.write('.'))
-    .pipe(gulp.dest('./dist/css/'));
-});
+// Build
 
-gulp.task('concatCSS_dis', function() {
-  var plugins = [
-    autoprefixer({ browsers: ['last 4 version'] }),
-    cssnano(),
-  ];
-  return gulp.src('./test/css/*.css')
-    .pipe(sourcemaps.init())
-    .pipe(plumber())
-    .pipe(concat("main.css"))
-    .pipe(postcss(plugins))
-    .pipe(sourcemaps.write('.'))
-    .pipe(gulp.dest('./dist/css/'));
-});
-
-//JS
-// Compress JS
-gulp.task('compressJS_dist', function(cb) {
-  pump([
-      gulp.src('test/js/*.js'),
-      sourcemaps.init(),
-      plumber(),
-      concat('main.js'),
-      gulp.dest('dist/js/'), // save .js
-      uglify(),
-      rename({ extname: '.min.js' }),
-      sourcemaps.write('.'),
-      gulp.dest('dist/js/'), // save .min.js
-    ],
-    cb
-  );
-});
-
-// Compress JS
-gulp.task('compressJS_dist', function(cb) {
-  pump([
-      gulp.src('test/js/*.js'),
-      sourcemaps.init(),
-      plumber(),
-      concat('main.js'),
-      gulp.dest('dist/js/'), // save .js
-      uglify(),
-      rename({ extname: '.min.js' }),
-      sourcemaps.write('.'),
-      gulp.dest('dist/js/'), // save .min.js
-    ],
-    cb
-  );
-});
-
-//Script
-
-// Start(restart) DIST
-gulp.task('dist', ['copyImage_dist', 'copyHTML_dist', 'concatCSS_dis', 'compressJS_dist']);
-
-*/
 
 
 

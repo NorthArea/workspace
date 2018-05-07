@@ -1,6 +1,6 @@
 {
   "name": "workspace",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "npm(gulp) workspase with PUG, SASS, PostCss and other",
   "main": "index.js",
   "scripts": {
@@ -11,14 +11,18 @@
     "url": "git+https://github.com/NorthArea/workspace.git"
   },
   "keywords": [
-    "npm",
     "workspace",
-    "sass",
-    "pug",
-    "postcss",
+    "npm",
     "gulp",
+    "postsass",
     "cssnano",
-    "git"
+    "sass",
+    "scss",
+    "pug",
+    "html",
+    "imagemin",
+    "uglify",
+    "autoprefixer"
   ],
   "author": "NorthArea",
   "license": "MIT",
@@ -28,8 +32,12 @@
   "homepage": "https://github.com/NorthArea/workspace#readme",
   "devDependencies": {
     "autoprefixer": "^8.4.1",
+    "clean-css": "^4.1.11",
     "cssnano": "^3.10.0",
-    "gulp": "^3.9.1",
+    "del": "^3.0.0",
+    "gulp": "^4.0.0",
+    "gulp-clean-css": "^3.9.4",
+    "gulp-cli": "^2.0.1",
     "gulp-concat": "^2.6.1",
     "gulp-imagemin": "^4.1.0",
     "gulp-plumber": "^1.2.0",
