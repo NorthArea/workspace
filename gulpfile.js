@@ -176,8 +176,12 @@ function frameworkScript() {
 
 // "Framework" CSS
 function frameworkStyle() {
+  var plugins = [
+    cssnano(),
+  ];
   return gulp.src(framework.styles.src, { sourcemaps: true })
     .pipe(concat('framework.css'))
+    .pipe(postcss(plugins))
     .pipe(gulp.dest(framework.styles.dest));
 }
 
@@ -234,7 +238,19 @@ gulp.task('watch', gulp.series(
 
 // Build
 
-
+gulp.task('concatCSS_dis', function() {
+  var plugins = [
+    autoprefixer({ browsers: ['last 4 version'] }),
+    cssnano(),
+  ];
+  return gulp.src('./test/css/*.css')
+    .pipe(sourcemaps.init())
+    .pipe(plumber())
+    .pipe(concat("main.css"))
+    .pipe(postcss(plugins))
+    .pipe(sourcemaps.write('.'))
+    .pipe(gulp.dest('./dist/css/'));
+});
 
 
 
