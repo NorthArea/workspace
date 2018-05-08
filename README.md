@@ -6,16 +6,16 @@
 ```
 ### Incude(Dependencies):
 del  
-gulp@next  
-gulp-concat  
-gulp-rename  
-gulp-pug  
-gulp-imagemin  
-autoprefixer  
 cssnano  
-gulp-postcss  
+autoprefixer  
+gulp@next  
+gulp-imagemin  
+gulp-pug  
 gulp-sass  
+gulp-postcss  
+gulp-concat  
 gulp-uglify  
+gulp-rename  
 
 ### tree workspace folder
 ```
@@ -26,20 +26,20 @@ workspace/
 │       └── css
 │       └── img
 │       └── js
-├── gulpfile.js
+├── gulpfile.js   - config and fuctions
 ├── package.json
 └── source/     - input
-    ├── framework - folder for your code or framework (bootstrap)
-    │   ├── css
-    │   ├── img
-    │   └── js
-    └── workspace - your workspace
-        ├── img
-        ├── js
-        └── scss
+    ├── framework - folder for your code or framework (like bootstrap)
+    │   ├── css("/**/*.css")
+    │   ├── img("/**/*")
+    │   └── js("/**/*.js")
+    └── workspace("/*.pug","/*.html") - your workspace
+        ├── img("/**/*")
+        ├── js("/**/*.js")
+        └── scss("/*.scss")
 ```
 
-### You can use npm or install gulp-cli
+### You can use npm or install globaly gulp-cli
 
 ```bash
   // Remove ./build
@@ -50,7 +50,7 @@ workspace/
   npm watch
   // Build workspace
   npm build
-  // 
+  // --tasks
   npm gulp
   
   npm install -g gulp-cli
@@ -80,30 +80,51 @@ Tasks for gulpfile.js
 │   ├── wsStyle - [render] SCSS from ./source/scss/*.scss
 │   ├── frameworkScript - [copy, concat] js from ./source/framework/js/**/*.js
 │   └── frameworkStyle - [copy, concat, PostCSS:'cssnano'] css from ./source/framework/css/**/*.css
-└─┬ watch
+├─┬ watch
+│ └─┬ <series>
+│   ├─┬ start
+│   │ └─┬ <series>
+│   │   ├── clean
+│   │   └─┬ <parallel>
+│   │     ├─┬ <series>
+│   │     │ ├─┬ <parallel>
+│   │     │ │ ├── copyWsImg
+│   │     │ │ └── copyFrameworkImg
+│   │     │ └─┬ <parallel>
+│   │     │   ├── compressWsImg
+│   │     │   └── compressFrameworkImg
+│   │     ├── copyWsHtml
+│   │     ├── wsPug
+│   │     ├── wsScript
+│   │     ├── wsStyle
+│   │     ├── frameworkScript
+│   │     └── frameworkStyle
+│   └─┬ <parallel>
+│     ├── watchWsImg [watch] img from ./source/img/
+│     ├── watchFrameworkImg [watch] img from ./source/framework/img/*
+│     ├── watchWsHtml [watch] ./source/*.html
+│     ├── watchWsPug [watch] ./source/*.pug
+│     ├── watchWsScript [watch] ./source/js/**/.js
+│     ├── watchWsStyle [watch] ./source/scss/.scss
+│     ├── watchFrameworkScript [watch] ./source/framework/js/**/.js
+│     └── watchFrameworkStyle [watch] ./source/framework/css/**/.css
+└─┬ build
   └─┬ <series>
-    ├─┬ start
+    ├── clean
+    ├─┬ <series>
+    │ ├─┬ <parallel>
+    │ │ ├── copyWsImg
+    │ │ └── copyFrameworkImg
     │ └─┬ <parallel>
-    │   ├─┬ <series>
-    │   │ ├─┬ <parallel>
-    │   │ │ ├── copyWsImg
-    │   │ │ └── copyFrameworkImg
-    │   │ └─┬ <parallel>
-    │   │   ├── compressWsImg
-    │   │   └── compressFrameworkImg
-    │   ├── copyWsHtml
-    │   ├── wsPug
-    │   ├── wsScript
-    │   ├── wsStyle
-    │   ├── frameworkScript
-    │   └── frameworkStyle
+    │   ├── compressWsImg
+    │   └── compressFrameworkImg
     └─┬ <parallel>
-      ├── watchWsImg [watch] img from ./source/img/
-      ├── watchFrameworkImg [watch] img from ./source/framework/img/*
-      ├── watchWsHtml [watch] ./source/*.html
-      ├── watchWsPug [watch] ./source/*.pug
-      ├── watchWsScript [watch] ./source/js/**/.js
-      ├── watchWsStyle [watch] ./source/scss/.scss
-      ├── watchFrameworkScript [watch] ./source/framework/js/**/.js
-      └── watchFrameworkStyle [watch] ./source/framework/css/**/.css
+      ├── copyWsHtml
+      ├── wsPug
+      ├── wsScriptBuild_uncompress
+      ├── wsScriptBuild_compress
+      ├── wsStyleBuild_uncompress
+      ├── wsStyleBuild_compress
+      ├── frameworkScript
+      └── frameworkStyle
 ```
