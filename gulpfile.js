@@ -45,7 +45,7 @@ var ws = {
     dest: 'build/assets/js/'
   },
   img: {
-    src: 'source/workspace/img/**',
+    src: 'source/workspace/img/**/*',
     dest: 'build/assets/img/'
   },
   html: {
@@ -68,7 +68,7 @@ var framework = {
     dest: 'build/assets/js/'
   },
   img: {
-    src: 'source/framework/img/**',
+    src: 'source/framework/img/**/*',
     dest: 'build/assets/img/'
   }
 };
@@ -81,6 +81,20 @@ var framework = {
 function clean() {
   return del(['build']);
 }
+
+function cleanAll() {
+  del(['build']);
+  del([framework.styles.src]);
+  del([framework.scripts.src]);
+  del([framework.img.src]);
+  del([ws.styles.src]);
+  del([ws.scripts.src]);
+  del([ws.img.src]);
+  del([ws.html.src]);
+  del([ws.pug.src]);
+  return del(['source/workspace/scss/.sass-cache']);
+}
+gulp.task('cleanAll', cleanAll);
 
 // Copy img
 function copyWsImg() {
