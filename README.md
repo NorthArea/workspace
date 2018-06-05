@@ -21,11 +21,21 @@ gulp-rename
 ```
 workspace/
 ├── README.md
-├── build/      - outpute
-│   └── assets
-│       └── css
-│       └── img
-│       └── js
+├── workspace/ - work folder
+│  ├── build/      - output
+│  │   └── assets
+│  │       └── css
+│  │       └── img
+│  │       └── js
+│  source/     - input
+│  ├── framework - folder for your code or framework (bootstrap or bulma or other css/js framework)
+│  │   ├── css("/**/*.css")
+│  │   ├── img("/**/*")
+│  │   └── js("/**/*.js")
+│  └── custom("/*.pug","/*.html")
+│      ├── img("/**/*")
+│      ├── js("/**/*.js")
+│      └── scss("/*.scss")
 ├── gulpfile.js   - config and fuctions
 ├── package.json
 └── source/     - input
@@ -39,19 +49,17 @@ workspace/
         └── scss("/*.scss")
 ```
 
-### You can use npm or install globaly gulp-cli
-
 ```bash
   // Remove ./build
-  npm clean
+  npm run clean
   // Start workspace
-  npm start
+  npm run start
   // Start workspace with watch
-  npm watch
+  npm run watch
   // Build workspace
-  npm build
+  npm run build
   // --tasks
-  npm gulp
+  npm run gulp
   
   npm install -g gulp-cli
   gulp clean
@@ -63,23 +71,26 @@ workspace/
 
 ### gulp --tasks:
 ```
-Tasks for gulpfile.js
-├── clean - remove ./build
-├─┬ start - start workspace
-│ └─┬ <parallel>
-│   ├─┬ <series>
-│   │ ├─┬ <parallel>
-│   │ │ ├── copyWsImg - [copy] img from ./source/img/
-│   │ │ └── copyFrameworkImg - [copy] img from ./source/framework/img/
-│   │ └─┬ <parallel>
-│   │   ├── compressWsImg - [compress] img from ./source/img/
-│   │   └── compressFrameworkImg  - [compress] img from ./source/framework/img/
-│   ├── copyWsHtml - [copy] html from ./source/*.html
-│   ├── wsPug - [rendering] html from ./source/scss/*.pug
-│   ├── wsScript - [render] JS from ./source/js/**/*.js
-│   ├── wsStyle - [render] SCSS from ./source/scss/*.scss
-│   ├── frameworkScript - [copy, concat] js from ./source/framework/js/**/*.js
-│   └── frameworkStyle - [copy, concat, PostCSS:'cssnano'] css from ./source/framework/css/**/*.css
+Tasks for ~/workspace/workspace/gulpfile.js
+├── clean
+├── cleanAll
+├─┬ start
+│ └─┬ <series>
+│   ├── clean
+│   └─┬ <parallel>
+│     ├─┬ <series>
+│     │ ├─┬ <parallel>
+│     │ │ ├── copyCustomImg
+│     │ │ └── copyFrameworkImg
+│     │ └─┬ <parallel>
+│     │   ├── compressCustomImg
+│     │   └── compressFrameworkImg
+│     ├── copyCustomHtml
+│     ├── renderCustomPug
+│     ├── bundleCustomScript
+│     ├── bundleCustomStyle
+│     ├── bundleFrameworkScript
+│     └── bundleFrameworkStyle
 ├─┬ watch
 │ └─┬ <series>
 │   ├─┬ start
@@ -88,43 +99,47 @@ Tasks for gulpfile.js
 │   │   └─┬ <parallel>
 │   │     ├─┬ <series>
 │   │     │ ├─┬ <parallel>
-│   │     │ │ ├── copyWsImg
+│   │     │ │ ├── copyCustomImg
 │   │     │ │ └── copyFrameworkImg
 │   │     │ └─┬ <parallel>
-│   │     │   ├── compressWsImg
+│   │     │   ├── compressCustomImg
 │   │     │   └── compressFrameworkImg
-│   │     ├── copyWsHtml
-│   │     ├── wsPug
-│   │     ├── wsScript
-│   │     ├── wsStyle
-│   │     ├── frameworkScript
-│   │     └── frameworkStyle
+│   │     ├── copyCustomHtml
+│   │     ├── renderCustomPug
+│   │     ├── bundleCustomScript
+│   │     ├── bundleCustomStyle
+│   │     ├── bundleFrameworkScript
+│   │     └── bundleFrameworkStyle
 │   └─┬ <parallel>
-│     ├── watchWsImg [watch] img from ./source/img/
-│     ├── watchFrameworkImg [watch] img from ./source/framework/img/*
-│     ├── watchWsHtml [watch] ./source/*.html
-│     ├── watchWsPug [watch] ./source/*.pug
-│     ├── watchWsScript [watch] ./source/js/**/.js
-│     ├── watchWsStyle [watch] ./source/scss/.scss
-│     ├── watchFrameworkScript [watch] ./source/framework/js/**/.js
-│     └── watchFrameworkStyle [watch] ./source/framework/css/**/.css
+│     ├── watchCustomImg
+│     ├── watchFrameworkImg
+│     ├── watchCustomHtml
+│     ├── watchCustomPug
+│     ├── watchCustomScript
+│     ├── watchCustomStyle
+│     ├── watchFrameworkScript
+│     └── watchFrameworkStyle
 └─┬ build
   └─┬ <series>
     ├── clean
-    ├─┬ <series>
-    │ ├─┬ <parallel>
-    │ │ ├── copyWsImg
-    │ │ └── copyFrameworkImg
+    ├─┬ <parallel>
+    │ ├─┬ <series>
+    │ │ ├─┬ <parallel>
+    │ │ │ ├── copyCustomImg
+    │ │ │ └── copyFrameworkImg
+    │ │ └─┬ <parallel>
+    │ │   ├── compressCustomImg
+    │ │   └── compressFrameworkImg
     │ └─┬ <parallel>
-    │   ├── compressWsImg
-    │   └── compressFrameworkImg
+    │   ├── copyCustomHtml
+    │   ├── renderCustomPug
+    │   ├── buildBundleCustomStyle_uncompress
+    │   ├── buildBundleCustomStyle_compress
+    │   ├── buildBundleCustomScript_uncompress
+    │   ├── buildBundleCustomScript_compress
+    │   ├── bundleFrameworkScript
+    │   └── bundleFrameworkStyle
     └─┬ <parallel>
-      ├── copyWsHtml
-      ├── wsPug
-      ├── wsScriptBuild_uncompress
-      ├── wsScriptBuild_compress
-      ├── wsStyleBuild_uncompress
-      ├── wsStyleBuild_compress
-      ├── frameworkScript
-      └── frameworkStyle
+      ├── combineStyle
+      └── combineScript
 ```
