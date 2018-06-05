@@ -49,22 +49,22 @@ const custom = {
     dest: 'workspace/build/img/'
   },
   html: {
-    src: 'workspace/source/custom/*.html',
+    src: 'workspace/source/*.html',
     dest: 'workspace/build/'
   },
   pug: {
-    src: 'workspace/source/custom/*.pug',
+    src: 'workspace/source/*.pug',
     dest: 'workspace/build/'
   }
 }
 
 const framework = {
   styles: {
-    src: 'workspace/source/framework/css/**/*.css',
+    src: 'workspace/source/framework/css/*.css',
     dest: 'workspace/build/css/'
   },
   scripts: {
-    src: 'workspace/source/framework/js/**/*.js',
+    src: 'workspace/source/framework/js/*.js',
     dest: 'workspace/build/js/'
   },
   img: {
@@ -75,7 +75,7 @@ const framework = {
 
 const combine = {
   styles: {
-    src: 'workspace/build/css/style.css',
+    src: 'workspace/build/css/styles.css',
     dest: 'workspace/build/css/'
   },
   scripts: {
@@ -181,9 +181,9 @@ function bundleCustomScript() {
 }
 
 // "Custom" SASS
-function bundleCustomStyle() {
+function bundleCustomStyles() {
   return gulp.src(custom.styles.src, { sourcemaps: false })
-    .pipe(concat('style.css'))
+    .pipe(concat('styles.css'))
     .pipe(sass())
     .pipe(sourcemaps.write('.', { sourceRoot: 'css-source' }))
     .pipe(gulp.dest(custom.styles.dest))
@@ -197,7 +197,7 @@ function bundleFrameworkScript() {
 }
 
 // "Framework" CSS
-function bundleFrameworkStyle() {
+function bundleFrameworkStyles() {
   return gulp.src(framework.styles.src, { sourcemaps: false })
     .pipe(concat('framework.css'))
     .pipe(gulp.dest(framework.styles.dest))
@@ -209,8 +209,8 @@ function watchCustomScript() {
 }
 
 // Watch "Сustom" SASS
-function watchCustomStyle() {
-  gulp.watch(custom.styles.src, bundleCustomStyle)
+function watchCustomStyles() {
+  gulp.watch(custom.styles.src, bundleCustomStyles)
 }
 
 // Watch Framework JS
@@ -219,25 +219,25 @@ function watchFrameworkScript() {
 }
 
 // Watch Framework CSS
-function watchFrameworkStyle() {
-  gulp.watch(framework.styles.src, bundleFrameworkStyle)
+function watchFrameworkStyles() {
+  gulp.watch(framework.styles.src, bundleFrameworkStyles)
 }
 
-// Compress & uncompress "custom" style
-function buildBundleCustomStyle_uncompress() {
+// Compress & uncompress "custom" styles
+function buildBundleCustomStyles_uncompress() {
   return gulp.src(custom.styles.src, { sourcemaps: false })
-    .pipe(concat('style.uncompress.css'))
+    .pipe(concat('styles.uncompress.css'))
     .pipe(sass())
     .pipe(gulp.dest(custom.styles.dest))
 }
 
-function buildBundleCustomStyle_compress() {
+function buildBundleCustomStyles_compress() {
   var plugins = [
     autoprefixer({ brocustomers: ['last 8 version'] }),
     cssnano(),
   ]
   return gulp.src(custom.styles.src, { sourcemaps: true })
-    .pipe(concat('style.css'))
+    .pipe(concat('styles.css'))
     .pipe(sass())
     .pipe(postcss(plugins))
     .pipe(sourcemaps.write('.', { sourceRoot: 'css-source' }))
@@ -259,7 +259,7 @@ function buildBundleCustomScript_compress() {
     .pipe(gulp.dest(custom.scripts.dest))
 }
 
-function combineStyle() {
+function combineStyles() {
   return gulp.src(combine.styles.src, { sourcemaps: false })
     .pipe(concat('combine.css'))
     .pipe(gulp.dest(combine.styles.dest))
@@ -285,9 +285,9 @@ gulp.task('start', gulp.series(
     copyCustomHtml,
     renderCustomPug,
     bundleCustomScript,
-    bundleCustomStyle,
+    bundleCustomStyles,
     bundleFrameworkScript,
-    bundleFrameworkStyle
+    bundleFrameworkStyles
   )
 ))
 
@@ -299,9 +299,9 @@ gulp.task('watch', gulp.series(
     watchCustomHtml,
     watchCustomPug,
     watchCustomScript,
-    watchCustomStyle,
+    watchCustomStyles,
     watchFrameworkScript,
-    watchFrameworkStyle
+    watchFrameworkStyles
   )
 ))
 
@@ -315,16 +315,16 @@ gulp.task('build', gulp.series(
     gulp.parallel(
       copyCustomHtml,
       renderCustomPug,
-      buildBundleCustomStyle_uncompress,
-      buildBundleCustomStyle_compress,
+      buildBundleCustomStyles_uncompress,
+      buildBundleCustomStyles_compress,
       buildBundleCustomScript_uncompress,
       buildBundleCustomScript_compress,
       bundleFrameworkScript,
-      bundleFrameworkStyle
+      bundleFrameworkStyles
     )
   ),
   gulp.parallel(
-    combineStyle,
+    combineStyles,
     combineScript
   )
 ))

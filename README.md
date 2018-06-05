@@ -17,36 +17,36 @@ gulp-concat
 gulp-uglify  
 gulp-rename  
 
+#### Input:
+PUG,HTML,JS,CSS,SCSS,JPEG,PNG...
+
+#### Output:
+framework.css  
+framework.js  
+styles.css, styles.uncompress.css, styles.css.map  
+main.js, main.uncompress.js, main.js.map  
+combine.css  
+combine.js  
 ### tree workspace folder
 ```
-workspace/
+workspace
 ├── README.md
-├── workspace/ - work folder
-│  ├── build/      - output
-│  │   └── assets
-│  │       └── css
-│  │       └── img
-│  │       └── js
-│  source/     - input
-│  ├── framework - folder for your code or framework (bootstrap or bulma or other css/js framework)
-│  │   ├── css("/**/*.css")
-│  │   ├── img("/**/*")
-│  │   └── js("/**/*.js")
-│  └── custom("/*.pug","/*.html")
-│      ├── img("/**/*")
-│      ├── js("/**/*.js")
-│      └── scss("/*.scss")
-├── gulpfile.js   - config and fuctions
+├── gulpfile.js
 ├── package.json
-└── source/     - input
-    ├── framework - folder for your code or framework (like bootstrap)
-    │   ├── css("/**/*.css")
-    │   ├── img("/**/*")
-    │   └── js("/**/*.js")
-    └── workspace("/*.pug","/*.html") - your workspace
-        ├── img("/**/*")
-        ├── js("/**/*.js")
-        └── scss("/*.scss")
+└── workspace - work folder
+    ├── build      - output
+    │   ├── css
+    │   ├── img
+    │   └── js
+    └── source("/*.pug","/*.html")     - input
+        ├── custom
+        │   ├── img("/**/*")
+        │   ├── js("/*.js")
+        │   └── scss("/*.scss")
+        └── framework - folder for framework (bootstrap or bulma or other css/js framework)
+            ├── css("/*.css")
+            ├── img("/**/*")
+            └── js("/*.js")
 ```
 
 ```bash
@@ -88,9 +88,9 @@ Tasks for ~/workspace/workspace/gulpfile.js
 │     ├── copyCustomHtml
 │     ├── renderCustomPug
 │     ├── bundleCustomScript
-│     ├── bundleCustomStyle
+│     ├── bundleCustomStyles
 │     ├── bundleFrameworkScript
-│     └── bundleFrameworkStyle
+│     └── bundleFrameworkStyles
 ├─┬ watch
 │ └─┬ <series>
 │   ├─┬ start
@@ -107,18 +107,18 @@ Tasks for ~/workspace/workspace/gulpfile.js
 │   │     ├── copyCustomHtml
 │   │     ├── renderCustomPug
 │   │     ├── bundleCustomScript
-│   │     ├── bundleCustomStyle
+│   │     ├── bundleCustomStyles
 │   │     ├── bundleFrameworkScript
-│   │     └── bundleFrameworkStyle
+│   │     └── bundleFrameworkStyles
 │   └─┬ <parallel>
 │     ├── watchCustomImg
 │     ├── watchFrameworkImg
 │     ├── watchCustomHtml
 │     ├── watchCustomPug
 │     ├── watchCustomScript
-│     ├── watchCustomStyle
+│     ├── watchCustomStyles
 │     ├── watchFrameworkScript
-│     └── watchFrameworkStyle
+│     └── watchFrameworkStyles
 └─┬ build
   └─┬ <series>
     ├── clean
@@ -133,13 +133,13 @@ Tasks for ~/workspace/workspace/gulpfile.js
     │ └─┬ <parallel>
     │   ├── copyCustomHtml
     │   ├── renderCustomPug
-    │   ├── buildBundleCustomStyle_uncompress
-    │   ├── buildBundleCustomStyle_compress
+    │   ├── buildBundleCustomStyles_uncompress
+    │   ├── buildBundleCustomStyles_compress
     │   ├── buildBundleCustomScript_uncompress
     │   ├── buildBundleCustomScript_compress
     │   ├── bundleFrameworkScript
-    │   └── bundleFrameworkStyle
+    │   └── bundleFrameworkStyles
     └─┬ <parallel>
-      ├── combineStyle
+      ├── combineStyles
       └── combineScript
 ```
