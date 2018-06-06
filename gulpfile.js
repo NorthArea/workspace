@@ -35,240 +35,152 @@ const sourcemaps = require('gulp-sourcemaps')
 
 
 //Variables
-const custom = {
-  styles: {
-    src: 'workspace/source/custom/scss/*.scss',
-    dest: 'workspace/build/css/'
+const path = {
+  style: {
+    src: ['./workspace/source/style/framework/*.css','./workspace/source/style/scss/*.scss'],
+    dest: './workspace/build/css/'
+  },
+  cache: {
+    src: ['./workspace/source/style/scss/.sass-cache/css/','./workspace/source/style/scss/.sass-cache/','./workspace/source/style/scss/**/*'],
+    css: './workspace/source/style/scss/.sass-cache/css/style.css'
   },
   scripts: {
-    src: 'workspace/source/custom/js/*.js',
-    dest: 'workspace/build/js/'
+    src: ['./workspace/source/js/jquery/*.js','./workspace/source/js/framework/*.js','./workspace/source/js/*.js'],
+    dest: './workspace/build/js/'
   },
   img: {
-    src: 'workspace/source/custom/img/**/*',
-    dest: 'workspace/build/img/'
+    src: './workspace/source/img/**/*',
+    dest: './workspace/build/img/'
   },
   html: {
-    src: 'workspace/source/*.html',
-    dest: 'workspace/build/'
+    src: ['./workspace/source/template/*.html','./workspace/source/template/partials/**/*'],
+    dest: './workspace/build/'
   },
   pug: {
-    src: 'workspace/source/*.pug',
-    dest: 'workspace/build/'
-  }
-}
-
-const framework = {
-  styles: {
-    src: 'workspace/source/framework/css/*.css',
-    dest: 'workspace/build/css/'
-  },
-  scripts: {
-    src: 'workspace/source/framework/js/*.js',
-    dest: 'workspace/build/js/'
-  },
-  img: {
-    src: 'workspace/source/framework/img/**/*',
-    dest: 'workspace/build/img/'
-  }
-}
-
-const combine = {
-  styles: {
-    src: 'workspace/build/css/styles.css',
-    dest: 'workspace/build/css/'
-  },
-  scripts: {
-    src: ['workspace/build/js/main.js', 'workspace/build/js/framework.js'],
-    dest: 'workspace/build/js/'
+    src: ['./workspace/source/template/*.pug','./workspace/source/template/partials/**/*'],
+    dest: './workspace/build/'
   }
 }
 
 //Functions
 
-// File
+// Clean
 //Remove build folder
 function clean() {
   return del(['./workspace/build'])
 }
 
+// CleanAll
 function cleanAll() {
-  del(['./workspace/build'])
-  del([framework.styles.src])
-  del([framework.scripts.src])
-  del([framework.img.src])
-  del([custom.styles.src])
-  del([custom.scripts.src])
-  del([custom.img.src])
-  del([custom.html.src])
-  del([custom.pug.src])
-  return del(['./workspace/source/custom/scss/*'])
+  return del(['./workspace/build',path.cache.src[0],path.cache.src[1],path.cache.src[2],path.style.src[0],path.style.src[1],path.scripts.src[0],path.scripts.src[1],path.img.src,path.pug.src[0],path.pug.src[1],path.html.src[0],path.html.src[1]])
 }
 
-// Copy img
-function copyCustomImg() {
-  return gulp.src(custom.img.src)
-    .pipe(gulp.dest(custom.img.dest))
+// Start
+// Copy IMG
+function copyImg() {
+  return gulp.src(path.img.src)
+    .pipe(gulp.dest(path.img.dest))
 }
 
-function copyFrameworkImg() {
-  return gulp.src(framework.img.src)
-    .pipe(gulp.dest(framework.img.dest))
-}
-
-// Compress PNG, JPEG, GIF, SVG and copy them in /dev/img/ and replace copyImg()
-function compressCustomImg() {
-  return gulp.src(custom.img.src)
+// Compress IMG
+function compressImg() {
+  return gulp.src(path.img.src)
     .pipe(imagemin([
       imagemin.gifsicle({ interlaced: true }),
       imagemin.jpegtran({ progressive: true }),
       imagemin.optipng({ optimizationLevel: 5 }),
     ]))
-    .pipe(gulp.dest(custom.img.dest))
+    .pipe(gulp.dest(path.img.dest))
 }
 
-function compressFrameworkImg() {
-  return gulp.src(framework.img.src)
-    .pipe(imagemin([
-      imagemin.gifsicle({ interlaced: true }),
-      imagemin.jpegtran({ progressive: true }),
-      imagemin.optipng({ optimizationLevel: 5 }),
-    ]))
-    .pipe(gulp.dest(framework.img.dest))
+// Watch IMG
+function watchImg() {
+  gulp.watch(path.img.src, gulp.series(copyImg, compressImg))
 }
 
-// Watch Img
-function watchCustomImg() {
-  gulp.watch(custom.img.src, gulp.series(copyCustomImg, compressCustomImg))
+// Copy HTML
+function copyHtml() {
+  return gulp.src(path.html.src[0])
+    .pipe(gulp.dest(path.html.dest))
 }
 
-function watchFrameworkImg() {
-  gulp.watch(framework.img.src, gulp.series(copyFrameworkImg, compressFrameworkImg))
+// Watch HTML
+function watchHtml() {
+  gulp.watch(path.html.src[0], copyHtml)
 }
 
-
-// PUG & HTML
-// Copy HTML  from ./source to ./test
-function copyCustomHtml() {
-  return gulp.src(custom.html.src)
-    .pipe(gulp.dest(custom.html.dest))
-}
-
-// Compile PUG to HTML
-function renderCustomPug() {
-  return gulp.src(custom.pug.src)
+// Compile PUG
+function renderPug() {
+  return gulp.src(path.pug.src[0])
     .pipe(pug())
-    .pipe(gulp.dest(custom.pug.dest))
+    .pipe(gulp.dest(path.pug.dest))
 }
 
-// Watch
-function watchCustomHtml() {
-  gulp.watch(custom.html.src, copyCustomHtml)
+// Watch PUG
+function watchPug() {
+  gulp.watch(path.pug.src[0], renderPug)
 }
 
-function watchCustomPug() {
-  gulp.watch(custom.pug.src, renderCustomPug)
+// Style
+function bundleStyle () {
+  return gulp.src(path.style.src, { sourcemaps: false})
+    .pipe(concat('style.css'))
+    .pipe(sass())
+    .pipe(sourcemaps.write('.', { sourceRoot: 'css-source' }))
+    .pipe(gulp.dest(path.style.dest))
 }
 
+// Watch Style
+function watchStyle() {
+  gulp.watch(path.style.src, bundleStyle)
+}
 
-//JS, CSS, SASS
-// "Custom" JS
-function bundleCustomScript() {
-  return gulp.src(custom.scripts.src, { sourcemaps: false })
+// JS
+function bundleScript() {
+  return gulp.src(path.scripts.src, { sourcemaps: false })
     .pipe(concat('main.js'))
     .pipe(sourcemaps.write('.'))
-    .pipe(gulp.dest(custom.scripts.dest))
+    .pipe(gulp.dest(path.scripts.dest))
 }
 
-// "Custom" SASS
-function bundleCustomStyles() {
-  return gulp.src(custom.styles.src, { sourcemaps: false })
-    .pipe(concat('styles.css'))
-    .pipe(sass())
-    .pipe(sourcemaps.write('.', { sourceRoot: 'css-source' }))
-    .pipe(gulp.dest(custom.styles.dest))
+// Watch JS
+function watchScript() {
+  gulp.watch(path.scripts.src, bundleScript)
 }
 
-// "Framework" JS
-function bundleFrameworkScript() {
-  return gulp.src(framework.scripts.src, { sourcemaps: false })
-    .pipe(concat('framework.js'))
-    .pipe(gulp.dest(framework.scripts.dest))
-}
-
-// "Framework" CSS
-function bundleFrameworkStyles() {
-  return gulp.src(framework.styles.src, { sourcemaps: false })
-    .pipe(concat('framework.css'))
-    .pipe(gulp.dest(framework.styles.dest))
-}
-
-// Watch "Сustom" JS
-function watchCustomScript() {
-  gulp.watch(custom.scripts.src, bundleCustomScript)
-}
-
-// Watch "Сustom" SASS
-function watchCustomStyles() {
-  gulp.watch(custom.styles.src, bundleCustomStyles)
-}
-
-// Watch Framework JS
-function watchFrameworkScript() {
-  gulp.watch(framework.scripts.src, bundleFrameworkScript)
-}
-
-// Watch Framework CSS
-function watchFrameworkStyles() {
-  gulp.watch(framework.styles.src, bundleFrameworkStyles)
-}
-
-// Compress & uncompress "custom" styles
-function buildBundleCustomStyles_uncompress() {
-  return gulp.src(custom.styles.src, { sourcemaps: false })
-    .pipe(concat('styles.uncompress.css'))
-    .pipe(sass())
-    .pipe(gulp.dest(custom.styles.dest))
-}
-
-function buildBundleCustomStyles_compress() {
+// Build
+// Compress & uncompress styles
+function buildStyle_compress() {
   var plugins = [
-    autoprefixer({ brocustomers: ['last 8 version'] }),
+    autoprefixer({ brocustomers: ['last 20 version'] }),
     cssnano(),
   ]
-  return gulp.src(custom.styles.src, { sourcemaps: true })
-    .pipe(concat('styles.css'))
+  return gulp.src(path.style.src[1])
+    .pipe(concat('style.css'))
     .pipe(sass())
     .pipe(postcss(plugins))
-    .pipe(sourcemaps.write('.', { sourceRoot: 'css-source' }))
-    .pipe(gulp.dest(custom.styles.dest))
+    .pipe(gulp.dest(path.cache.src[0]))
+}
+
+function buildStyle_concat() {
+  return (gulp.src([path.style.src[0],path.cache.css]))
+    .pipe(concat('style.css'))
+    .pipe(gulp.dest(path.style.dest))
 }
 
 // Compress & uncompress "custom" script
-function buildBundleCustomScript_uncompress() {
-  return gulp.src(custom.scripts.src, { sourcemaps: false })
+function buildScript_uncompress() {
+  return gulp.src(path.scripts.src, { sourcemaps: false })
     .pipe(concat('main.uncompress.js'))
-    .pipe(gulp.dest(custom.scripts.dest))
+    .pipe(gulp.dest(path.scripts.dest))
 }
 
-function buildBundleCustomScript_compress() {
-  return gulp.src(custom.scripts.src, { sourcemaps: true })
+function buildScript_compress() {
+  return gulp.src(path.scripts.src, { sourcemaps: true })
     .pipe(concat('main.js'))
     .pipe(uglify())
     .pipe(sourcemaps.write('.'))
-    .pipe(gulp.dest(custom.scripts.dest))
-}
-
-function combineStyles() {
-  return gulp.src(combine.styles.src, { sourcemaps: false })
-    .pipe(concat('combine.css'))
-    .pipe(gulp.dest(combine.styles.dest))
-}
-
-function combineScript() {
-  return gulp.src(combine.scripts.src, { sourcemaps: false })
-    .pipe(concat('combine.js'))
-    .pipe(gulp.dest(combine.scripts.dest))
+    .pipe(gulp.dest(path.scripts.dest))
 }
 
 // Tasks
@@ -279,29 +191,24 @@ gulp.task('start', gulp.series(
   clean,
   gulp.parallel(
     gulp.series(
-      gulp.parallel(copyCustomImg, copyFrameworkImg),
-      gulp.parallel(compressCustomImg, compressFrameworkImg)
+      gulp.parallel(copyImg),
+      gulp.parallel(compressImg)
     ),
-    copyCustomHtml,
-    renderCustomPug,
-    bundleCustomScript,
-    bundleCustomStyles,
-    bundleFrameworkScript,
-    bundleFrameworkStyles
+    copyHtml,
+    renderPug,
+    bundleScript,
+    bundleStyle
   )
 ))
 
 gulp.task('watch', gulp.series(
   'start',
   gulp.parallel(
-    watchCustomImg,
-    watchFrameworkImg,
-    watchCustomHtml,
-    watchCustomPug,
-    watchCustomScript,
-    watchCustomStyles,
-    watchFrameworkScript,
-    watchFrameworkStyles
+    watchImg,
+    watchHtml,
+    watchPug,
+    watchScript,
+    watchStyle
   )
 ))
 
@@ -309,22 +216,13 @@ gulp.task('build', gulp.series(
   clean,
   gulp.parallel(
     gulp.series(
-      gulp.parallel(copyCustomImg, copyFrameworkImg),
-      gulp.parallel(compressCustomImg, compressFrameworkImg)
+      gulp.parallel(copyImg),
+      gulp.parallel(compressImg)
     ),
-    gulp.parallel(
-      copyCustomHtml,
-      renderCustomPug,
-      buildBundleCustomStyles_uncompress,
-      buildBundleCustomStyles_compress,
-      buildBundleCustomScript_uncompress,
-      buildBundleCustomScript_compress,
-      bundleFrameworkScript,
-      bundleFrameworkStyles
-    )
-  ),
-  gulp.parallel(
-    combineStyles,
-    combineScript
+    copyHtml,
+    renderPug,
+    gulp.series(buildStyle_compress,buildStyle_concat),
+    buildScript_uncompress,
+    buildScript_compress
   )
 ))

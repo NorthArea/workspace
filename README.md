@@ -1,9 +1,7 @@
 # Workspace
 
-### In "workspace" folder:
-```bash
-  npm install
-```
+Run npm install to install Node.js dependencies.
+
 ### Incude(Dependencies):
 del  
 cssnano  
@@ -21,47 +19,49 @@ gulp-rename
 PUG,HTML,JS,CSS,SCSS,JPEG,PNG...
 
 #### Output:
-framework.css  
-framework.js  
-styles.css, styles.uncompress.css, styles.css.map  
-main.js, main.uncompress.js, main.js.map  
-combine.css  
-combine.js  
+PUG template and partials.
+styles.css - combine and minify.
+main.js - combine and uglify.
+
 ### tree workspace folder
 ```
 workspace
+├── LICENSE
 ├── README.md
 ├── gulpfile.js
 ├── package.json
 └── workspace - work folder
-    ├── build      - output
-    │   ├── css
-    │   ├── img
-    │   └── js
+    ├── build - output
+    │   ├── css
+    │   ├── img
+    │   └── js
     └── source("/*.pug","/*.html")     - input
-        ├── custom
-        │   ├── img("/**/*")
-        │   ├── js("/*.js")
-        │   └── scss("/*.scss")
-        └── framework - folder for framework (bootstrap or bulma or other css/js framework)
-            ├── css("/*.css")
-            ├── img("/**/*")
-            └── js("/*.js")
+        ├── img("/**/*")
+        ├── js("/*.js")
+        │   ├── framework("/*.js")
+        │   └── jquery("/*.js")
+        ├── style
+        │   ├── framework("/*.css")
+        │   └── scss("/*.scss")
+        └── template
+            └── partials
 ```
 
 ```bash
-  // Remove ./build
+  ##Remove build folder
   npm run clean
-  // Start workspace
+  ##Remove build and other folder
+  npm run cleanAll
+  ## Start workspace
   npm run start
-  // Start workspace with watch
+  ## Start workspace to 'watch'
   npm run watch
-  // Build workspace
+  ## Build - distr.
   npm run build
-  // --tasks
+  ## list of gulp tasks
   npm run gulp
   
-  npm install -g gulp-cli
+  ## npm install -g gulp-cli
   gulp clean
   gulp start
   gulp watch
@@ -80,17 +80,13 @@ Tasks for ~/workspace/workspace/gulpfile.js
 │   └─┬ <parallel>
 │     ├─┬ <series>
 │     │ ├─┬ <parallel>
-│     │ │ ├── copyCustomImg
-│     │ │ └── copyFrameworkImg
+│     │ │ └── copyImg
 │     │ └─┬ <parallel>
-│     │   ├── compressCustomImg
-│     │   └── compressFrameworkImg
-│     ├── copyCustomHtml
-│     ├── renderCustomPug
-│     ├── bundleCustomScript
-│     ├── bundleCustomStyles
-│     ├── bundleFrameworkScript
-│     └── bundleFrameworkStyles
+│     │   └── compressImg
+│     ├── copyHtml
+│     ├── renderPug
+│     ├── bundleScript
+│     └── bundleStyle
 ├─┬ watch
 │ └─┬ <series>
 │   ├─┬ start
@@ -99,47 +95,33 @@ Tasks for ~/workspace/workspace/gulpfile.js
 │   │   └─┬ <parallel>
 │   │     ├─┬ <series>
 │   │     │ ├─┬ <parallel>
-│   │     │ │ ├── copyCustomImg
-│   │     │ │ └── copyFrameworkImg
+│   │     │ │ └── copyImg
 │   │     │ └─┬ <parallel>
-│   │     │   ├── compressCustomImg
-│   │     │   └── compressFrameworkImg
-│   │     ├── copyCustomHtml
-│   │     ├── renderCustomPug
-│   │     ├── bundleCustomScript
-│   │     ├── bundleCustomStyles
-│   │     ├── bundleFrameworkScript
-│   │     └── bundleFrameworkStyles
+│   │     │   └── compressImg
+│   │     ├── copyHtml
+│   │     ├── renderPug
+│   │     ├── bundleScript
+│   │     └── bundleStyle
 │   └─┬ <parallel>
-│     ├── watchCustomImg
-│     ├── watchFrameworkImg
-│     ├── watchCustomHtml
-│     ├── watchCustomPug
-│     ├── watchCustomScript
-│     ├── watchCustomStyles
-│     ├── watchFrameworkScript
-│     └── watchFrameworkStyles
+│     ├── watchImg
+│     ├── watchHtml
+│     ├── watchPug
+│     ├── watchScript
+│     └── watchStyle
 └─┬ build
   └─┬ <series>
     ├── clean
-    ├─┬ <parallel>
-    │ ├─┬ <series>
-    │ │ ├─┬ <parallel>
-    │ │ │ ├── copyCustomImg
-    │ │ │ └── copyFrameworkImg
-    │ │ └─┬ <parallel>
-    │ │   ├── compressCustomImg
-    │ │   └── compressFrameworkImg
-    │ └─┬ <parallel>
-    │   ├── copyCustomHtml
-    │   ├── renderCustomPug
-    │   ├── buildBundleCustomStyles_uncompress
-    │   ├── buildBundleCustomStyles_compress
-    │   ├── buildBundleCustomScript_uncompress
-    │   ├── buildBundleCustomScript_compress
-    │   ├── bundleFrameworkScript
-    │   └── bundleFrameworkStyles
     └─┬ <parallel>
-      ├── combineStyles
-      └── combineScript
+      ├─┬ <series>
+      │ ├─┬ <parallel>
+      │ │ └── copyImg
+      │ └─┬ <parallel>
+      │   └── compressImg
+      ├── copyHtml
+      ├── renderPug
+      ├─┬ <series>
+      │ ├── buildStyle_compress
+      │ └── buildStyle_concat
+      ├── buildScript_uncompress
+      └── buildScript_compress
 ```
