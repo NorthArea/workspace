@@ -1,6 +1,6 @@
 {
   "name": "workspace",
-  "version": "2.4.1",
+  "version": "2.4.3",
   "description": "npm(gulp) workspase with PUG, SASS, PostCss and other",
   "main": "gulpfile.js",
   "scripts": {
