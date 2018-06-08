@@ -1,6 +1,7 @@
 # Workspace
 
-Run npm install to install Node.js dependencies.
+Run "npm install" to install Node.js dependencies.
+Run "npm install -s gulp@next" to install gulp 4
 
 ### Incude(Dependencies):
 del  
