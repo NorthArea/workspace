@@ -41,7 +41,7 @@ const path = {
     dest: './workspace/build/css/'
   },
   cache: {
-    src: ['./workspace/source/style/scss/.sass-cache/css/','./workspace/source/style/scss/.sass-cache/','./workspace/source/style/scss/**/*'],
+    src: ['./workspace/source/style/scss/.sass-cache/css/','./workspace/source/style/scss/.sass-cache/','./workspace/source/style/scss/import/.sass-cache/','./workspace/source/style/scss/*.css*','./workspace/source/style/scss/import**/*'],
     css: './workspace/source/style/scss/.sass-cache/css/style.css'
   },
   scripts: {
@@ -72,7 +72,7 @@ function clean() {
 
 // CleanAll
 function cleanAll() {
-  return del(['./workspace/build',path.cache.src[0],path.cache.src[1],path.cache.src[2],path.style.src[0],path.style.src[1],path.scripts.src[0],path.scripts.src[1],path.scripts.src[2],path.img.src,path.pug.src[0],path.pug.src[1],path.html.src[0],path.html.src[1]])
+  return del(['./workspace/build',path.cache.src[0],path.cache.src[1],path.cache.src[2],path.cache.src[3],path.style.src[0],path.style.src[1],path.scripts.src[0],path.scripts.src[1],path.scripts.src[2],path.img.src,path.pug.src[0],path.pug.src[1],path.html.src[0],path.html.src[1]])
 }
 
 // Start
